@@ -16,6 +16,18 @@ pat = os.getenv("TOKEN")
 
 st.title("Reporte de estados - Azure DevOps")
 
+
+def prepare_dataframe_for_streamlit(df):
+    df_safe = df.copy()
+    df_safe.columns = [str(column) for column in df_safe.columns]
+
+    for column in df_safe.columns:
+        if pd.api.types.is_string_dtype(df_safe[column]) or df_safe[column].dtype == "object":
+            df_safe[column] = df_safe[column].where(df_safe[column].notna(), None)
+            df_safe[column] = df_safe[column].astype(object)
+
+    return df_safe
+
 # --- inputs ---
 fecha_corte_date = st.date_input(
     "Fecha de corte",
@@ -43,7 +55,7 @@ if st.button("Generar reporte"):
                 fecha_corte
             )
 
-        st.session_state["df_resultado"] = df_resultado
+        st.session_state["df_resultado"] = prepare_dataframe_for_streamlit(df_resultado)
         st.success(f"Reporte generado con {len(df_resultado)} filas")
 
 if "df_resultado" in st.session_state:
