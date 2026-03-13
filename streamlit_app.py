@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+from datetime import date
 from dotenv import load_dotenv
 import os
 from openpyxl.styles import Font, PatternFill, Alignment
@@ -18,24 +19,17 @@ st.title("Reporte de estados - Azure DevOps")
 # --- inputs ---
 fecha_corte_date = st.date_input(
     "Fecha de corte",
-    value=None,
-    format="YYYY-MM-DD"
+    value=date.today()
 )
 
-if fecha_corte_date:
-    fecha_corte = f"{fecha_corte_date.isoformat()}T00:00:00Z"
-    st.info(f"Se filtrará el estado activo al: {fecha_corte}")
-else:
-    fecha_corte = None
-    st.warning("Debes seleccionar una fecha de corte para generar el reporte.")
+fecha_corte = f"{fecha_corte_date.isoformat()}T00:00:00Z"
+st.info(f"Se filtrará el estado activo al: {fecha_corte}")
 
 ids_file = st.file_uploader("Sube el archivo ids.csv", type=["csv"])
 
 if st.button("Generar reporte"):
     if ids_file is None:
         st.error("Por favor sube el archivo ids.csv")
-    elif fecha_corte is None:
-        st.error("La fecha de corte es obligatoria.")
     else:
         df_ids = pd.read_csv(ids_file)
         itemsID = df_ids["ID"].dropna().astype(int).tolist()
