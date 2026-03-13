@@ -56,6 +56,8 @@ def get_log_per_id(organization, project, id, pat):
 
 def apply_fecha_corte(df, fecha_corte=None):
     if df.empty:
+        df = df.copy()
+        df["cumple"] = pd.Series(dtype="bool")
         return df
 
     if fecha_corte is None:
@@ -86,6 +88,9 @@ def create_dataframe(idList, organization, project, pat, fecha_corte=None):
         rows += rows_response
 
     df = pd.DataFrame(rows, columns=["workItemId", "idLog", "prevState", "state", "prevChangeDate", "changeDate", "rev"])
+
+    if df.empty:
+        return pd.DataFrame(columns=["workItemId", "estado_actual", "estado_fecha_corte", "estado_final"])
 
     # estado actual: la fila con state == 'last' guarda en prevState el estado más reciente
     df_actual = (
